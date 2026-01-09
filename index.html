@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiView - مشغل فيديو متعدد النوافذ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/ads.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --dark: #121212;
+            --darker: #0a0a0a;
+            --light: #f8f9fa;
+            --gray: #2d2d2d;
+            --success: #4cc9f0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--darker) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 1px solid var(--gray);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--accent);
+            background: rgba(247, 37, 133, 0.1);
+            padding: 15px;
+            border-radius: 50%;
+        }
+        
+        .logo h1 {
+            font-size: 2rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .logo span {
+            color: var(--success);
+            font-size: 1.1rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 25px;
+        }
+        
+        @media (max-width: 1100px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Input Section */
+        .input-section {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid var(--gray);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: var(--success);
+            font-size: 1.4rem;
+        }
+        
+        .section-title i {
+            background: rgba(76, 201, 240, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .url-input-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .url-input {
+            flex: 1;
+            min-width: 300px;
+            padding: 18px 25px;
+            font-size: 1.1rem;
+            border: 2px solid var(--gray);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.07);
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .url-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .url-input::placeholder {
+            color: #aaa;
+        }
+        
+        .btn {
+            padding: 18px 35px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid var(--gray);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-accent:hover {
+            background: #e11575;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid var(--gray);
+        }
+        
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .control-group h3 {
+            margin-bottom: 15px;
+            color: var(--success);
+            font-size: 1.2rem;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .slider {
+            flex: 1;
+            height: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--gray);
+            border-radius: 5px;
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+        
+        .slider-value {
+            background: var(--primary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        /* Video Grid */
+        .video-grid-section {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid var(--gray);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .video-grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        @media (max-width: 1200px) {
+            .video-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .video-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .video-frame {
+            position: relative;
+            background: black;
+            border-radius: 10px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            border: 2px solid var(--gray);
+            transition: all 0.3s;
+        }
+        
+        .video-frame:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .frame-number {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 10;
+        }
+        
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #aaa;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .video-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--gray);
+        }
+        
+        .video-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: black;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        /* Footer */
+        footer {
+            margin-top: 40px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            border-top: 1px solid var(--gray);
+        }
+        
+        .footer-info {
+            color: #aaa;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            margin-top: 20px;
+        }
+        
+        .footer-info a {
+            color: var(--success);
+            text-decoration: none;
+        }
+        
+        .footer-info a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .logo {
+                justify-content: center;
+            }
+            
+            .url-input-container {
+                flex-direction: column;
+            }
+            
+            .url-input {
+                min-width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Alert */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            display: none;
+        }
+        
+        .alert-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid rgba(220, 53, 69, 0.5);
+            color: #f8d7da;
+        }
+        
+        .alert-success {
+            background: rgba(25, 135, 84, 0.2);
+            border: 1px solid rgba(25, 135, 84, 0.5);
+            color: #d1e7dd;
+        }
+        
+        /* Stats */
+        .stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .stat-box {
+            background: rgba(67, 97, 238, 0.1);
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(67, 97, 238, 0.3);
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--success);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        
+        /* Ad containers in main page */
+        .ad-main-container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid var(--gray);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .ad-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(247, 37, 133, 0.1);
+            color: var(--accent);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <i class="fas fa-video"></i>
+                <div>
+                    <h1>MultiView Player</h1>
+                    <span>مشغل فيديو متعدد النوافذ للمحتوى الاجتماعي</span>
+                </div>
+            </div>
+            
+            <!-- إعلان الهيدر - سيتم تحميله من ads.js -->
+            <div id="header-ad" class="ad-main-container">
+                <div class="ad-label">
+                    <i class="fas fa-ad"></i>
+                    <span>إعلان - A-ADS</span>
+                </div>
+                <div id="header-ad-placeholder">
+                    <div class="video-placeholder">
+                        <i class="fas fa-rectangle-ad"></i>
+                        <p>إعلان A-ADS - الهيدر</p>
+                        <small>728x90</small>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Alert Messages -->
+        <div id="alert" class="alert">
+            <i class="fas fa-info-circle"></i>
+            <span id="alert-message"></span>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="main-panel">
+                <!-- Input Section -->
+                <section class="input-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-link"></i>
+                        رابط الفيديو
+                    </h2>
+                    
+                    <div class="url-input-container">
+                        <input type="text" id="videoUrl" class="url-input" 
+                               placeholder="https://www.facebook.com/.../videos/... أو رابط الريلز">
+                        <button id="loadBtn" class="btn btn-primary">
+                            <i class="fas fa-play-circle"></i>
+                            مشاهدة في 20 نافذة
+                        </button>
+                    </div>
+                    
+                    <div class="controls">
+                        <div class="control-group">
+                            <h3><i class="fas fa-th-large"></i> عدد النوافذ</h3>
+                            <div class="slider-container">
+                                <input type="range" min="1" max="20" value="20" class="slider" id="windowCount">
+                                <div class="slider-value" id="windowValue">20</div>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <h3><i class="fas fa-columns"></i> توزيع النوافذ</h3>
+                            <div class="slider-container">
+                                <input type="range" min="1" max="5" value="4" class="slider" id="gridColumns">
+                                <div class="slider-value" id="columnsValue">4</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- إعلان بين المحتوى -->
+                    <div id="content-ad" class="ad-main-container">
+                        <div class="ad-label">
+                            <i class="fas fa-ad"></i>
+                            <span>إعلان - A-ADS</span>
+                        </div>
+                        <div id="content-ad-placeholder">
+                            <div class="video-placeholder">
+                                <i class="fas fa-rectangle-ad"></i>
+                                <p>إعلان A-ADS - داخل المحتوى</p>
+                                <small>728x90</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats">
+                        <div class="stat-box">
+                            <div class="stat-value" id="totalWindows">0</div>
+                            <div class="stat-label">النوافذ النشطة</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="totalPlays">0</div>
+                            <div class="stat-label">مرات التشغيل</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="totalVideos">0</div>
+                            <div class="stat-label">الفيديوهات المعالجة</div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Video Grid -->
+                <section class="video-grid-section">
+                    <div class="video-grid-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-film"></i>
+                            النوافذ المتعددة (20 نافذة)
+                        </h2>
+                        <div>
+                            <button id="playAllBtn" class="btn btn-secondary" disabled>
+                                <i class="fas fa-play"></i>
+                                تشغيل الكل
+                            </button>
+                            <button id="refreshBtn" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt"></i>
+                                تحديث
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="video-grid" id="videoGrid">
+                        <!-- النوافذ ستظهر هنا ديناميكياً -->
+                        <div class="video-frame">
+                            <div class="frame-number">1</div>
+                            <div class="video-placeholder">
+                                <i class="fas fa-video-slash"></i>
+                                <p>في انتظار تحميل الفيديو</p>
+                                <small>سيظهر الفيديو هنا بعد إدخال الرابط</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="fullscreenBtn" class="btn btn-accent">
+                            <i class="fas fa-expand"></i>
+                            وضع ملء الشاشة
+                        </button>
+                        <button id="muteAllBtn" class="btn btn-secondary">
+                            <i class="fas fa-volume-mute"></i>
+                            كتم الكل
+                        </button>
+                        <button id="resetBtn" class="btn btn-secondary">
+                            <i class="fas fa-redo"></i>
+                            إعادة تعيين
+                        </button>
+                    </div>
+                </section>
+            </div>
+            
+            <!-- Sidebar للإعلانات -->
+            <div class="sidebar">
+                <!-- إعلان عمودي 1 -->
+                <div id="sidebar-ad-1" class="ad-main-container">
+                    <div class="ad-label">
+                        <i class="fas fa-ad"></i>
+                        <span>إعلان - A-ADS</span>
+                    </div>
+                    <div id="sidebar-ad-1-placeholder">
+                        <div class="video-placeholder" style="min-height: 300px;">
+                            <i class="fas fa-rectangle-ad"></i>
+                            <p>إعلان A-ADS - الشريط الجانبي</p>
+                            <small>300x600</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- إعلان عمودي 2 -->
+                <div id="sidebar-ad-2" class="ad-main-container">
+                    <div class="ad-label">
+                        <i class="fas fa-ad"></i>
+                        <span>إعلان - A-ADS</span>
+                    </div>
+                    <div id="sidebar-ad-2-placeholder">
+                        <div class="video-placeholder" style="min-height: 250px;">
+                            <i class="fas fa-rectangle-ad"></i>
+                            <p>إعلان A-ADS - مربع</p>
+                            <small>300x250</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- معلومات الموقع -->
+                <div class="ad-main-container">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        معلومات
+                    </h3>
+                    <div style="text-align: right; padding: 15px;">
+                        <p>🔹 يدعم فيديوهات وريلز فيسبوك</p>
+                        <p>🔹 يعمل على جميع المتصفحات</p>
+                        <p>🔹 واجهة عربية كاملة</p>
+                        <p>🔹 مشروع غير ربحي</p>
+                        <p>🔹 الإعلانات لدعم استمرارية الموقع</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer>
+            <!-- إعلان الفوتر -->
+            <div id="footer-ad" class="ad-main-container">
+                <div class="ad-label">
+                    <i class="fas fa-ad"></i>
+                    <span>إعلان - A-ADS</span>
+                </div>
+                <div id="footer-ad-placeholder">
+                    <div class="video-placeholder" style="min-height: 90px;">
+                        <i class="fas fa-rectangle-ad"></i>
+                        <p>إعلان A-ADS - الفوتر</p>
+                        <small>728x90</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-info">
+                <p>MultiView Player - مشغل فيديو متعدد النوافذ | مشروع تطوعي مدعوم بإعلانات A-ADS</p>
+                <p>© 2024 جميع الحقوق محفوظة | <a href="privacy.html">سياسة الخصوصية</a> | <a href="terms.html">شروط الاستخدام</a></p>
+                <p style="margin-top: 10px; color: #666; font-size: 0.8rem;">
+                    ملاحظة: الموقع لا يخزن أي فيديوهات، فقط يعرض محتوى منصات التواصل الاجتماعي.
+                    الإعلانات تساعد على استمرارية المشروع التطوعي.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- تحميل ملف الإعلانات -->
+    <script src="js/ads.js"></script>
+    
+    <script>
+        // عناصر DOM
+        const videoUrl = document.getElementById('videoUrl');
+        const loadBtn = document.getElementById('loadBtn');
+        const videoGrid = document.getElementById('videoGrid');
+        const windowCount = document.getElementById('windowCount');
+        const windowValue = document.getElementById('windowValue');
+        const gridColumns = document.getElementById('gridColumns');
+        const columnsValue = document.getElementById('columnsValue');
+        const playAllBtn = document.getElementById('playAllBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const muteAllBtn = document.getElementById('muteAllBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const alertDiv = document.getElementById('alert');
+        const alertMessage = document.getElementById('alert-message');
+        
+        // إحصائيات
+        const totalWindows = document.getElementById('totalWindows');
+        const totalPlays = document.getElementById('totalPlays');
+        const totalVideos = document.getElementById('totalVideos');
+        
+        // متغيرات التطبيق
+        let currentVideoUrl = '';
+        let windows = [];
+        let playCount = 0;
+        let videoCount = 0;
+        let isAllPlaying = false;
+        
+        // تحديث قيم السلايدر
+        windowCount.addEventListener('input', function() {
+            windowValue.textContent = this.value;
+            updateGrid();
+        });
+        
+        gridColumns.addEventListener('input', function() {
+            columnsValue.textContent = this.value;
+            videoGrid.style.gridTemplateColumns = `repeat(${this.value}, 1fr)`;
+        });
+        
+        // تحميل الفيديو في النوافذ
+        loadBtn.addEventListener('click', function() {
+            const url = videoUrl.value.trim();
+            
+            if (!url) {
+                showAlert('الرجاء إدخال رابط فيديو فيسبوك', 'error');
+                return;
+            }
+            
+            if (!isValidFacebookUrl(url)) {
+                showAlert('الرجاء إدخال رابط فيسبوك صحيح (فيديو أو ريلز)', 'error');
+                return;
+            }
+            
+            currentVideoUrl = url;
+            videoCount++;
+            totalVideos.textContent = videoCount;
+            
+            // تفعيل زر تشغيل الكل
+            playAllBtn.disabled = false;
+            
+            // إنشاء النوافذ
+            createVideoWindows();
+            
+            showAlert('تم تحميل الفيديو في ' + windowCount.value + ' نافذة', 'success');
+            
+            // تسجيل إحصائيات (يمكن إرسالها لخادم)
+            logStatistic('video_loaded', { windows: windowCount.value, url: url });
+        });
+        
+        // إنشاء النوافذ
+        function createVideoWindows() {
+            const count = parseInt(windowCount.value);
+            videoGrid.innerHTML = '';
+            windows = [];
+            
+            for (let i = 0; i < count; i++) {
+                const videoFrame = document.createElement('div');
+                videoFrame.className = 'video-frame';
+                videoFrame.dataset.index = i;
+                
+                const frameNumber = document.createElement('div');
+                frameNumber.className = 'frame-number';
+                frameNumber.textContent = i + 1;
+                
+                // محاولة تضمين فيديو فيسبوك
+                const videoIframe = document.createElement('iframe');
+                videoIframe.className = 'video-iframe';
+                videoIframe.src = getFacebookEmbedUrl(currentVideoUrl);
+                videoIframe.allow = 'autoplay; encrypted-media';
+                videoIframe.allowFullscreen = true;
+                videoIframe.title = `فيديو ${i + 1}`;
+                
+                videoFrame.appendChild(frameNumber);
+                videoFrame.appendChild(videoIframe);
+                videoGrid.appendChild(videoFrame);
+                
+                windows.push({
+                    element: videoIframe,
+                    index: i,
+                    isPlaying: false
+                });
+            }
+            
+            totalWindows.textContent = count;
+            updateGrid();
+        }
+        
+        // تحديث توزيع النوافذ
+        function updateGrid() {
+            videoGrid.style.gridTemplateColumns = `repeat(${gridColumns.value}, 1fr)`;
+        }
+        
+        // تشغيل جميع النوافذ
+        playAllBtn.addEventListener('click', function() {
+            showAlert('انقر على كل فيديو يدوياً ليبدأ التشغيل بسبب قيود المتصفح', 'success');
+            
+            playCount += windows.length;
+            totalPlays.textContent = playCount;
+            
+            // تغيير الأيقونة
+            const icon = playAllBtn.querySelector('i');
+            if (isAllPlaying) {
+                icon.className = 'fas fa-play';
+                playAllBtn.innerHTML = '<i class="fas fa-play"></i> تشغيل الكل';
+            } else {
+                icon.className = 'fas fa-pause';
+                playAllBtn.innerHTML = '<i class="fas fa-pause"></i> إيقاف الكل';
+            }
+            
+            isAllPlaying = !isAllPlaying;
+            
+            // تسجيل إحصائيات
+            logStatistic('play_all_clicked', { windows: windows.length });
+        });
+        
+        // تحديث النوافذ
+        refreshBtn.addEventListener('click', function() {
+            if (currentVideoUrl) {
+                createVideoWindows();
+                showAlert('تم تحديث جميع النوافذ', 'success');
+            } else {
+                showAlert('لا يوجد فيديو مفتوح للتحديث', 'error');
+            }
+        });
+        
+        // وضع ملء الشاشة
+        fullscreenBtn.addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`خطأ في ملء الشاشة: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+        
+        // كتم جميع النوافذ
+        muteAllBtn.addEventListener('click', function() {
+            showAlert('استخدم زر كتم الصوت في كل فيديو على حدة', 'success');
+        });
+        
+        // إعادة تعيين
+        resetBtn.addEventListener('click', function() {
+            videoUrl.value = '';
+            videoGrid.innerHTML = `
+                <div class="video-frame">
+                    <div class="frame-number">1</div>
+                    <div class="video-placeholder">
+                        <i class="fas fa-video-slash"></i>
+                        <p>في انتظار تحميل الفيديو</p>
+                        <small>سيظهر الفيديو هنا بعد إدخال الرابط</small>
+                    </div>
+                </div>
+            `;
+            
+            playAllBtn.disabled = true;
+            windows = [];
+            currentVideoUrl = '';
+            
+            showAlert('تم إعادة تعيين جميع النوافذ', 'success');
+        });
+        
+        // التحقق من رابط فيسبوك
+        function isValidFacebookUrl(url) {
+            return url.includes('facebook.com') && (url.includes('/video') || url.includes('/reel') || url.includes('/watch'));
+        }
+        
+        // تحويل رابط فيسبوك إلى رابط تضمين
+        function getFacebookEmbedUrl(url) {
+            return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0&width=500`;
+        }
+        
+        // عرض رسائل التنبيه
+        function showAlert(message, type) {
+            alertMessage.textContent = message;
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.style.display = 'flex';
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // تسجيل إحصائيات
+        function logStatistic(action, data) {
+            console.log('إحصائية:', action, data);
+            // هنا يمكنك إرسال البيانات لخادمك
+        }
+        
+        // تحميل عشوائي للفيديوهات عند فتح الصفحة
+        window.addEventListener('DOMContentLoaded', function() {
+            totalVideos.textContent = '0';
+            totalWindows.textContent = '0';
+            totalPlays.textContent = '0';
+            
+            const exampleUrls = [
+                'https://www.facebook.com/facebook/videos/10153231379946729/',
+                'https://www.facebook.com/100044304235964/videos/122094367501183887/',
+                'https://www.facebook.com/reel/123456789012345'
+            ];
+            
+            const randomUrl = exampleUrls[Math.floor(Math.random() * exampleUrls.length)];
+            videoUrl.placeholder = randomUrl;
+        });
+    </script>
+</body>
+</html>
